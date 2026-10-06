@@ -1,11 +1,11 @@
 # Step 1: From prices to returns
 
-## Learning contract
+## About this lesson
 
-Keep the implementation small and readable. Discuss the mathematics before each
-new calculation. Explain one module at a time and review the learner's answers
-and tests before adding the next module. Explanations in conversation are in
-Spanish; repository code and documentation are in English.
+This was the project's first implemented module. The complete optimizer is now
+available; this page preserves the single-asset foundations. Read
+[the full walkthrough](02_walkthrough.md) after this lesson. Code and repository
+documentation are in English; mentoring explanations are in Spanish.
 
 ## Mathematics
 
@@ -79,13 +79,20 @@ input array or round returns during calculations.
 Negative and zero returns are valid. There is no price-positivity check here
 because returns are different quantities from prices.
 
-### 6. Run the demonstration
+### 6. Run the original calculation
 
-`main.py` contains the hypothetical input, calls the two functions, and prints the
-results. The mathematical module performs no input/output. The condition
-`if __name__ == "__main__"` runs the demonstration when the file is executed,
-while allowing imports without printing anything. The `:.2%` display format
-shows a decimal as a percentage with two decimal places.
+You can reproduce the original small example in a Python session:
+
+```python
+from returns import calculate_returns, estimate_mean_return
+returns = calculate_returns([100, 110, 99])
+print(returns)
+print(estimate_mean_return(returns))
+```
+
+`main.py` now runs the complete optimizer. Its `--demo` mode uses a larger,
+explicitly synthetic multi-asset dataset; this lesson's functions remain
+independent and keep their original tests.
 
 ### 7. Check behavior with tests
 
@@ -98,37 +105,16 @@ use `assertAlmostEqual` or `np.testing.assert_allclose`, because binary floating
 point can introduce small rounding differences. `with self.assertRaises(ValueError)`
 checks that an invalid input is rejected. A missing value is not replaced with zero.
 
-## Small architecture that can grow
+## From this module to the complete program
 
-Only the returns module is implemented now. Files below marked "planned" will be
-introduced when needed; they are not empty scaffolding in the repository.
+The [README](../README.md) describes the implemented architecture. The complete
+workflow separates holdings extraction, market prices, portfolio mathematics,
+Monte Carlo sampling, and presentation. [The next guide](02_walkthrough.md)
+explains the formulas and the corresponding code blocks.
 
-| File | Responsibility | Why it is separate |
-| --- | --- | --- |
-| `returns.py` | Simple returns and their historical mean | Pure calculations can be tested without downloads or charts. |
-| `main.py` | Assemble and run an example | Keeps input/output outside mathematical functions. |
-| `test_returns.py` | Verify the current mathematical contract | Hand-calculated cases make failures understandable. |
-| `data.py` (planned) | Read, validate, and align a CSV price table | A later API integration can change without changing the mathematics. |
-| `portfolio.py` (planned) | Covariance, portfolio return, volatility, Sharpe ratio | Groups portfolio-level formulas together. |
-| `simulation.py` (planned) | Sample valid portfolio weights and evaluate them | Separates random sampling from financial formulas. |
-| `visualization.py` (planned) | Plot risk versus expected return | Charts consume results rather than recalculate them. |
-
-Use NumPy for numerical work. Add a CSV library and plotting dependency when those
-steps need them. Keep production functions small, names explicit, and inputs and
-outputs visible. Avoid introducing classes or generic frameworks without a clear need.
-
-## Next steps, after understanding checks
-
-1. Explain covariance, portfolio variance, Sharpe ratio, and Monte Carlo sampling
-   before implementing those calculations.
-2. Add each mathematical function with its tests, one small block at a time.
-3. Connect a small reproducible CSV dataset.
-4. Sample long-only, fully invested portfolios with a reproducible random seed.
-5. Plot the results and identify the best Sharpe ratio among sampled portfolios.
-6. Finish the professional English README, including limitations and improvements.
-
-Sampling portfolios explores candidate weights; it does not guarantee the exact
-global optimum. We will explain that limitation when introducing Monte Carlo.
+The first lesson rejects missing input outright. The multi-asset data module
+calculates adjacent returns without filling missing prices, then retains rows
+with valid returns for every asset. It reports the omitted observations.
 
 ## Your checkpoint
 
@@ -138,7 +124,7 @@ global optimum. We will explain that limitation when introducing Monte Carlo.
 3. Add a test for prices `[80, 100, 90]`, computing the expected returns by hand.
 4. Add a test for a one-element return sequence and predict its estimated mean.
 
-Review these answers and tests before moving to covariance.
+Use these checks to review the foundations, then study covariance in the full walkthrough.
 
 ## Reference documentation
 
