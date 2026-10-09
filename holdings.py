@@ -1,5 +1,6 @@
 """Extract a long-only portfolio from a broker's CSV or Excel export."""
 
+import csv
 from pathlib import Path
 import re
 import unicodedata
@@ -58,10 +59,14 @@ def read_holdings(source, filename=None, decimal="."):
     name = filename or str(getattr(source, "name", source))
     suffix = Path(name).suffix.lower()
     if suffix == ".csv":
-        table = pd.read_csv(source, sep=None, engine="python", dtype=str, encoding="utf-8-sig")
+        try:
+            table = pd.read_csv(source, sep=None, engine="python", dtype=str,
+                                encoding="utf-8-sig", keep_default_na=False)
+        except (csv.Error, pd.errors.EmptyDataError, pd.errors.ParserError) as error:
+            raise ValueError("Cannot read this CSV file. Include a header and at least one holding.") from error
     elif suffix == ".xlsx":
         try:
-            table = pd.read_excel(source, engine="openpyxl")
+            table = pd.read_excel(source, engine="openpyxl", keep_default_na=False)
         except (BadZipFile, KeyError) as error:
             raise ValueError("Cannot read this XLSX file. Export the holdings table again from your broker.") from error
     else:
@@ -71,7 +76,8 @@ def read_holdings(source, filename=None, decimal="."):
 
 def clean_holdings(table, decimal="."):
     """Map known headers, validate values, and combine repeated positions."""
-    table = table.dropna(how="all").copy()
+    table = table.map(lambda value: np.nan if isinstance(value, str) and not value.strip() else value)
+    table = table.dropna(how="all")
     renamed = {}
     for column in table.columns:
         header = normalize_header(column)
@@ -113,7 +119,7 @@ def clean_holdings(table, decimal="."):
     holdings = pd.DataFrame({"ticker": tickers.to_numpy(), position_column: values})
     holdings = holdings.groupby("ticker", sort=False, as_index=False)[position_column].sum()
     if len(holdings) > 50:
-        raise ValueError("This learning application supports at most 50 assets per portfolio.")
+        raise ValueError("A portfolio can contain at most 50 assets.")
     return holdings
 
 

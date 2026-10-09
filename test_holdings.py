@@ -10,6 +10,28 @@ from holdings import clean_holdings, current_weights, read_holdings
 
 
 class HoldingsTests(unittest.TestCase):
+    def test_empty_csv_has_a_readable_error(self):
+        for content in ("", "\n\n"):
+            with self.subTest(content=content), self.assertRaisesRegex(ValueError, "Cannot read this CSV"):
+                read_holdings(StringIO(content), "positions.csv")
+
+    def test_na_ticker_is_preserved_in_csv_and_excel(self):
+        csv_source = StringIO("Ticker,Quantity\nNA,2\n")
+        excel_source = BytesIO()
+        pd.DataFrame({"Ticker": ["NA"], "Quantity": [2]}).to_excel(excel_source, index=False)
+        excel_source.seek(0)
+        for source, name in ((csv_source, "positions.csv"), (excel_source, "positions.xlsx")):
+            with self.subTest(name=name):
+                result = read_holdings(source, name)
+                self.assertEqual(result["ticker"].tolist(), ["NA"])
+                self.assertEqual(result["quantity"].tolist(), [2])
+
+    def test_blank_rows_are_skipped_but_incomplete_positions_are_rejected(self):
+        result = read_holdings(StringIO("Ticker,Quantity\n , \nAAPL,2\n"), "positions.csv")
+        self.assertEqual(result["ticker"].tolist(), ["AAPL"])
+        with self.assertRaisesRegex(ValueError, "Every holding"):
+            read_holdings(StringIO("Ticker,Quantity\nAAPL,\n"), "positions.csv")
+
     def test_csv_detects_headers_and_combines_duplicates_in_original_order(self):
         source = StringIO("Symbol,Shares\nmsft,2\naapl,1\nMSFT,3\n")
         result = read_holdings(source, "positions.csv")

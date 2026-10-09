@@ -1,4 +1,4 @@
-"""Download daily Yahoo data and keep data-cleaning choices explicit."""
+"""Yahoo price history, daily returns and offline sample data."""
 
 import numpy as np
 import pandas as pd
@@ -54,7 +54,7 @@ def download_prices(tickers, period="2y"):
 
 
 def daily_returns(prices, min_observations=60):
-    """Calculate returns BEFORE dropping incomplete rows, so gaps never become daily returns."""
+    """Calculate adjacent returns, then discard incomplete observations."""
     if prices.empty or prices.columns.has_duplicates or prices.index.has_duplicates:
         raise ValueError("Prices must contain unique dates and tickers.")
     if not prices.index.is_monotonic_increasing:
@@ -74,7 +74,7 @@ def daily_returns(prices, min_observations=60):
 
 
 def demo_prices():
-    """Create reproducible SYNTHETIC prices for an offline demonstration, never as an API fallback."""
+    """Generate a fixed synthetic price history for three assets."""
     rng = np.random.default_rng(7)
     market = rng.normal(0.0003, 0.008, size=(504, 1))
     noise = rng.normal(0, [0.006, 0.012, 0.004], size=(504, 3))

@@ -10,7 +10,7 @@ from holdings import read_holdings
 from reporting import plot_portfolios
 
 
-st.set_page_config(page_title="Portfolio Optimizer", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Portfolio Optimizer", layout="wide")
 st.title("Portfolio Optimizer")
 st.write("Import your holdings, explore risk and return, and compare portfolio allocations.")
 st.caption("Long-only stocks and ETFs · One quote currency · Historical estimates · No order execution")
@@ -43,7 +43,7 @@ if mode == "Import broker file + Yahoo prices":
             ready = False
             st.error(str(error))
 else:
-    st.info("The demo uses synthetic data and works without internet. It is never used to replace a failed market download.")
+    st.info("The demo uses synthetic holdings and prices and works offline.")
 
 if st.button("Run optimization", type="primary", disabled=not ready):
     st.session_state.pop("result", None)

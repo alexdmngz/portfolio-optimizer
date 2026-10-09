@@ -1,4 +1,4 @@
-"""Connect input, prices, mathematics, and sampling in one readable workflow."""
+"""Shared portfolio analysis for the app and CLI."""
 
 import pandas as pd
 
@@ -9,7 +9,7 @@ from simulation import select_portfolios, simulate_portfolios
 
 
 def analyze_portfolio(holdings=None, period="2y", count=10000, seed=42, risk_free_rate=0.0):
-    """Analyze imported holdings, or an explicitly labelled offline demo when holdings is None."""
+    """Analyze holdings, or synthetic demo data when holdings is None."""
     is_demo = holdings is None
     if is_demo:
         prices = demo_prices()
