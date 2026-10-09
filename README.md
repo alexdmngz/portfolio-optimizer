@@ -1,5 +1,7 @@
 # Portfolio Optimizer
 
+**In development.** The current version is a working prototype.
+
 Compare your current portfolio with thousands of alternative allocations. Import
 a CSV or Excel file, download historical prices from Yahoo Finance, and explore
 the trade-off between return and volatility in a local Streamlit app.
